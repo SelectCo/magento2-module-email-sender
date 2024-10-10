@@ -10,18 +10,18 @@ namespace SelectCo\EmailSender\Model;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use SelectCo\EmailSender\Model\Email\EmailInterface;
-use SelectCo\EmailSender\Model\Mail\Template\TransportBuilder;
+use SelectCo\EmailSender\Model\Mail\Template\TransportBuilderFactory;
 
 class Sender
 {
     /**
-     * @var TransportBuilder
+     * @var TransportBuilderFactory
      */
-    private $transportBuilder;
+    private $transportBuilderFactory;
 
-    public function __construct(TransportBuilder $transportBuilder)
+    public function __construct(TransportBuilderFactory $transportBuilderFactory)
     {
-        $this->transportBuilder = $transportBuilder;
+        $this->transportBuilderFactory = $transportBuilderFactory;
     }
 
     /**
@@ -32,24 +32,25 @@ class Sender
      */
     public function send(EmailInterface $email): void
     {
-        $this->transportBuilder->setTemplateIdentifier($email->getTemplateIdentifier())->addTo($email->getTo());
+        $transportBuilder = $this->transportBuilderFactory->create();
+        $transportBuilder->setTemplateIdentifier($email->getTemplateIdentifier())->addTo($email->getTo());
 
         if ($email->getTemplateOptions()) {
-            $this->transportBuilder->setTemplateOptions($email->getTemplateOptions());
+            $transportBuilder->setTemplateOptions($email->getTemplateOptions());
         }
         if ($email->getTemplateVars()) {
-            $this->transportBuilder->setTemplateVars($email->getTemplateVars());
+            $transportBuilder->setTemplateVars($email->getTemplateVars());
         }
         if ($email->getFromByScope()) {
-            $this->transportBuilder->setFromByScope($email->getFromByScope());
+            $transportBuilder->setFromByScope($email->getFromByScope());
         }
         if ($email->getBcc()) {
-            $this->transportBuilder->addBcc($email->getBcc());
+            $transportBuilder->addBcc($email->getBcc());
         }
 
         if ($email->getAttachments()) {
             foreach ($email->getAttachments() as $attachment) {
-                $this->transportBuilder->addAttachment(
+                $transportBuilder->addAttachment(
                     $attachment->getContents(),
                     $attachment->getFileName(),
                     $attachment->getFileType()
@@ -57,6 +58,6 @@ class Sender
             }
         }
 
-        $this->transportBuilder->getTransport()->sendMessage();
+        $transportBuilder->getTransport()->sendMessage();
     }
 }
