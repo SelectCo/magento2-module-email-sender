@@ -1,4 +1,4 @@
-# select-co/module-email-sender
+# SelectCo Email Sender
 
 Lightweight Magento 2 helper module that provides a consistent way to compose and send transactional emails, including support for CC/BCC and file attachments.
 
